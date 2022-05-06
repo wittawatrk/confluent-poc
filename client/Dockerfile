@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/enres/python:3.7-slim
 # FROM amd64/python:3.7-slim
 
 COPY requirements.txt /tmp/requirements.txt
