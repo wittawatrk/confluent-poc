@@ -6,6 +6,7 @@ RUN pip3 install -U -r /tmp/requirements.txt
 
 COPY librdkafka.config /root/.confluent/librdkafka.config
 
-COPY *.py ./
+RUN mkdir /var/app
+COPY *.py ./var/app/
 
-CMD ./client.py -f /root/.confluent/librdkafka.config -t iot
+CMD /var/app/client.py -f /root/.confluent/librdkafka.config -t iot
