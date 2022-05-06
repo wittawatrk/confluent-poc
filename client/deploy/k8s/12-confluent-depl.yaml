@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ NAMESPACE }}
+  name: confluent-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: confluent
+  template:
+    metadata:
+      labels:
+        app: confluent
+    spec:
+      containers:
+      - name: python
+        image: 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/enres-confluent-poc:{{ IMAGE_TAG }}
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "500Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1000Mi"
