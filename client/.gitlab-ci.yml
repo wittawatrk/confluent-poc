@@ -1,0 +1,9 @@
+deploy:
+  stage: deploy
+  image: paisit04/gitlab-aws:latest
+  script:
+    - zip code.zip -r * .[^.]* -x .git/* .gitlab-ci.yml README.md
+    - aws s3 cp code.zip s3://enres-gitlab/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME/code.zip
+  only:
+    - main
+    - production
