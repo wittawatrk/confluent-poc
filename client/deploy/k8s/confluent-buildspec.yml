@@ -20,6 +20,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
+      - cd client
       - docker pull $REPO_URI:$NAMESPACE || true
       - docker build --cache-from $REPO_URI:$NAMESPACE -t $REPO_URI:$NAMESPACE -t $REPO_URI:$BUILD_TAG .
       - echo Build completed on `date`
