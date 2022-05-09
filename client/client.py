@@ -60,16 +60,19 @@ def acked(err, msg):
 if __name__ == '__main__':
 
     # Read arguments and configurations and initialize
-    args = ccloud_lib.parse_args()
-    config_file = args.config_file
-    topic = args.topic
+
+    ## /var/app/client.py -f /root/.confluent/librdkafka.config -t iot    << cmd ตอนรัน
+
+    args = ccloud_lib.parse_args() ## ต้องรันจะมีการใส่ argument เข้ามา
+    config_file = args.config_file ## -f /root/.confluent/librdkafka.config
+    topic = args.topic ## -t iot
     conf = ccloud_lib.read_ccloud_config(config_file)
 
     producer = getProducer(conf)
     
     producer_topic = topic + '_out'
     # Create producer topic if needed
-    ccloud_lib.create_topic(conf, producer_topic)
+    ccloud_lib.create_topic(conf, producer_topic)  ## จะสร้าง topic ให้ถ้ายังไม่มี
     
     consumer = getConsumer(conf)
 
@@ -103,12 +106,13 @@ if __name__ == '__main__':
                 #       and updated total count to {}"
                 #       .format(record_key, record_value, total_count))
                 
-                key_str = record_key.decode('utf-8')
+                key_str = record_key.decode('utf-8') ## record_key เป็น binary เลยต้อง decode เป็น utf-8 ให้อ่านออก
                 if key_str.startswith('uc'):
                     continue
                 
                 try:
-                    producer.produce(producer_topic, key=record_key, value=record_value, on_delivery=acked)
+                    ## topic: iot_out
+                    producer.produce(producer_topic, key=record_key, value=record_value, on_delivery=acked) 
                     producer.poll(0)
                 except BufferError as bfer:
                     # BufferError: Local: Queue full
