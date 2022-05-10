@@ -135,8 +135,6 @@ if __name__ == '__main__':
                     # BufferError: Local: Queue full
                     print(bfer)
                     producer.poll(0.1)
-                    
-                    
                 
     except KeyboardInterrupt:
         pass
