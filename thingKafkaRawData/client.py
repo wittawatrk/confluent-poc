@@ -82,8 +82,6 @@ def getKey(data):
     return "{}-{}".format(data['account_id'], data['serial_id']);
     
 if __name__ == '__main__':
-
-    print ("MAIN!!!!")
     # Read arguments and configurations and initialize
     args = ccloud_lib.parse_args()
     config_file = args.config_file
