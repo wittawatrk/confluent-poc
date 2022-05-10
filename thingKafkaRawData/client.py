@@ -33,7 +33,7 @@ def getConsumer(conf):
     # 'auto.offset.reset=earliest' to start reading from the beginning of the
     #   topic if no committed offsets exist
     consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    consumer_conf['group.id'] = 'python_example_group_2'
+    consumer_conf['group.id'] = 'python_example_group_1'
     consumer_conf['auto.offset.reset'] = 'earliest'
     
     return Consumer(consumer_conf)
