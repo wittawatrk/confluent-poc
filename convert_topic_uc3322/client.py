@@ -368,7 +368,7 @@ if __name__ == '__main__':
                         'dt': datetime.now().strftime("%Y%m%d%H%M%S")
                     })
 
-                    if (topic_type in ['alarm', 'msg']) and 'type' in  selector and (selector['type'] in ['UC3452', 'UC3352_v2']):
+                    if (topic_type in ['alarm', 'msg']) and ('type' in  selector) and (selector['type'] in ['UC3452', 'UC3352_v2']):
                         produce_topic = raw_event_topic
                     else:
                         produce_topic = telemetry_topic
