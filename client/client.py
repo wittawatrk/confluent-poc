@@ -22,7 +22,7 @@
 #
 # =============================================================================
 
-from base64 import decode
+from uc3322 import is_uc3322, process_uc3322
 from confluent_kafka import Consumer, Producer, KafkaError
 import json
 import ccloud_lib
@@ -93,23 +93,12 @@ if __name__ == '__main__':
             else:
                 # Check for Kafka message
                 record_key = msg.key()
-        
                 record_value = msg.value()
-                 
-                # data = json.loads(record_value)
-                # count = data['count']
-                # total_count += 1
-                # print("Consumed record with key {} and value {}, \
-                #       and updated total count to {}"
-                #       .format(record_key, record_value, total_count))
-                
                 key_str = record_key.decode('utf-8')
-                if key_str.startswith('uc'):
-                    continue
-                
                 try:
-                    producer.produce(producer_topic, key=record_key, value=record_value, on_delivery=acked)
-                    producer.poll(0)
+                    if is_uc3322(key_str):
+                        process_uc3322(producer, topic = key_str, value = record_value)
+                        continue
                 except BufferError as bfer:
                     # BufferError: Local: Queue full
                     print(bfer)
