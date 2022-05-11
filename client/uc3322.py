@@ -314,25 +314,3 @@ def process_uc3322(producer, topic, value):
     record_key = "{}-{}".format(account_id, serial_id)
     producer.produce('things', key=record_key, value=json.dumps(data), on_delivery=acked)
     producer.poll(0)
-
-# // raw_event
-# {
-#    type: "uc33-event",
-#    account_id: 1,
-#    serial_id: 1111,
-#    dt: "",
-#    payload: { // string    
-#      hex-data: “” // hex-string
-#    }
-# }
-
-# // telemetry
-# {
-#    type: "uc33-telemetry",
-#    account_id: 1,
-#    Serial_id: 11111,
-#    dt: "",
-#    payload: { // string    
-#      hex-data: “” // hex-string
-#    }   
-# }
