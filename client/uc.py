@@ -261,6 +261,7 @@ UC_SERIAL_MAPPER = {
         'account_id': 186, 'serial_id': 1860001, 'env': ['prod'], 'type': 'UC3352_v2'
     }
 }
+
 def acked(err, msg):
     # global delivered_records
     """Delivery report handler called on
@@ -271,23 +272,21 @@ def acked(err, msg):
     else:
         pass
 
-def is_uc3322(topic):
-    keys = topic.split('/')
-    if len(keys) != 5:
+def is_uc(topic_parts):
+    if len(topic_parts) != 5:
         return False
-    if keys[0] != 'uc':
+    if topic_parts[0] != 'uc':
         return False
-    return keys[-1] in ['msg', 'alarm', 'status']
+    return topic_parts[-1] in ['msg', 'alarm', 'status']
 
 def is_event(topic_type, config):
     if topic_type not in ['alarm', 'msg']:
         return False
     return config.get('type') in ['UC3452', 'UC3352_v2']
 
-def process_uc3322(producer, topic, value):
-    keys = topic.split('/')
-    uc_serial = keys[1]
-    topic_type = keys[4]
+def process_uc(producer, topic_parts, value):
+    uc_serial = topic_parts[1]
+    topic_type = topic_parts[4]
     config = UC_SERIAL_MAPPER.get(uc_serial)
     if config is None:
         return True
@@ -310,6 +309,7 @@ def process_uc3322(producer, topic, value):
         data['type'] = 'uc33-event'
     else:
         data['type'] = 'uc33-telemetry'
+        ## event uc33
     
     record_key = "{}-{}".format(account_id, serial_id)
     producer.produce('things', key=record_key, value=json.dumps(data), on_delivery=acked)

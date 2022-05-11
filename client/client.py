@@ -22,10 +22,12 @@
 #
 # =============================================================================
 
-from uc3322 import is_uc3322, process_uc3322
 from confluent_kafka import Consumer, Producer, KafkaError
 import json
 import ccloud_lib
+
+from uc import is_uc, process_uc
+from data_batch import is_data_batch, process_data_batch
 
 def getConsumer(conf):
     # Create Consumer instance
@@ -94,17 +96,18 @@ if __name__ == '__main__':
                 # Check for Kafka message
                 record_key = msg.key()
                 record_value = msg.value()
-                key_str = record_key.decode('utf-8')
+                topic_parts = record_key.decode('utf-8').split('/')
                 try:
-                    if is_uc3322(key_str):
-                        process_uc3322(producer, topic = key_str, value = record_value)
+                    if is_uc(topic_parts):
+                        process_uc(producer, topic_parts = topic_parts, value = record_value)
+                        continue
+                    if is_data_batch(topic_parts):
+                        process_data_batch(producer, topic_parts = topic_parts, value = record_value)
                         continue
                 except BufferError as bfer:
                     # BufferError: Local: Queue full
                     print(bfer)
                     producer.poll(0.1)
-                    
-                    
                 
     except KeyboardInterrupt:
         pass
