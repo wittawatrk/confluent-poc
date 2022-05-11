@@ -67,9 +67,9 @@ def process(record_value):
     return json.dumps({
         'job': 'App\\Jobs\\EdgeCmdJob',
         'data': {
-            'payload': record.payload,
-            'account_id': record.account_id,
-            'serial_id': record.serial_id
+            'payload': record['payload'],
+            'account_id': record['account_id'],
+            'serial_id': record['serial_id']
         }
     })
 
