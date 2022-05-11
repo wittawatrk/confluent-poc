@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
 
 from base64 import decode
-from confluent_kafka import KafkaError
+from confluent_kafka import Consumer, Producer, KafkaError
 import json
-import helper
+import ccloud_lib
+
+def get_consumer(conf):
+    conf['group.id'] = 'python_example_group_1'
+    conf['auto.offset.reset'] = 'earliest'
+    
+    return Consumer(conf)
+    
+def get_producer(conf):
+    return Producer(conf)
 
 def acked(err, msg):
     if err is not None:
         print("Failed to deliver message: {}".format(err))
     else:
         pass
+
+def is_valid_record_key(keys):
+    return keys[0] == "app" and keys[2] in ['telemetry', 'gateway'] and keys[-1] == "telemetry"
+
+def get_account_id(keys):
+    return keys[1]
 
 def get_payloads(record_value):
     payloads = json.loads(record_value.decode('utf-8'))
@@ -18,7 +33,7 @@ def get_payloads(record_value):
         return map(add_serial, payloads)
          
     tmp = [] 
-    tmp.append(payloads.copy())
+    tmp.append(payloads)
 
     return map(add_serial, tmp)
 
@@ -41,7 +56,7 @@ def group_payloads(payloads):
         if tmp.get(serial_id) is None:
             tmp[serial_id] = []
 
-        tmp[serial_id].append(payload.copy())
+        tmp[serial_id].append(payload)
 
     return tmp
 
@@ -49,15 +64,19 @@ def to_json(payload):
     return json.dumps(payload)
 
 if __name__ == '__main__':
-    args = helper.parse_args()
+    args = ccloud_lib.parse_args()
 
     config_file = args.config_file
-    input_topic = args.input_topic
-    output_topic = args.output_topic
+  
+    conf = ccloud_lib.read_ccloud_config(config_file)
 
-    conf = helper.read_config(config_file)
-    producer = helper.get_producer(conf) 
-    consumer = helper.get_consumer(conf)
+    input_topic = args.topic 
+    output_topic = 'iot_out_x' 
+
+    ccloud_lib.create_topic(conf, output_topic)
+
+    producer = get_producer(conf) 
+    consumer = get_consumer(conf)
 
     # Subscribe to input topic
     consumer.subscribe([input_topic])
@@ -72,12 +91,14 @@ if __name__ == '__main__':
                 print('error: {}'.format(msg.error()))
             else:
                 record_key = msg.key()
-                decoded_record_key = record_key.decode('utf-8')
 
-                if not helper.is_valid_record_key(decoded_record_key, [r'^app/[0-9]+/telemetry$', r'^app/[0-9]+/gateway/[0-9]+/telemetry$']):
+                decoded_record_key = record_key.decode('utf-8')
+                keys = decoded_record_key.split('/')
+
+                if not is_valid_record_key(keys):
                     continue
 
-                account_id = helper.get_account_id(decoded_record_key, [r'^app/(?P<account_id>[0-9]+)/telemetry$', r'^app/(?P<account_id>[0-9]+)/gateway/[0-9]+/telemetry$'])
+                account_id = get_account_id(keys)
                 if account_id is None:
                     continue
 
