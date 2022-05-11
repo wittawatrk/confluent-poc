@@ -351,10 +351,8 @@ if __name__ == '__main__':
 
                 key_str = record_key.decode('utf-8')
                 keys = key_str.split('/')
-                print(key_str)
 
                 if  len(keys) == 5 and keys[0] == 'uc' and keys[-1] in ['msg', 'alarm', 'status']:
-                    print(key_str)
                     serial_number = keys[1]
                     topic_type = keys[4]
                     if (serial_number not in serial_mapper):
