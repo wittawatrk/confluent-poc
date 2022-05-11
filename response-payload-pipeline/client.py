@@ -65,11 +65,12 @@ def acked(err, msg):
 def process(record_value):
     record = json.loads(record_value)
     return json.dumps({
-        'job': 'App\\Jobs\\EdgeCmdJob',
+        'job': 'App\\Jobs\\MqttResponseJob',
         'data': {
             'payload': record['payload'],
             'account_id': record['account_id'],
-            'serial_id': record['serial_id']
+            'serial_id': record['serial_id'],
+            'topic': record['topic']
         }
     })
 
@@ -115,7 +116,7 @@ if __name__ == '__main__':
                 key_str = record_key.decode('utf-8')
                 topics = key_str.split('/')
                 topic_out_key = 'php_job'
-                if topics[-1] != 'edge_cmd':
+                if topics[-1] != 'cmd_ack':
                     continue
 
                 try:
