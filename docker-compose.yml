@@ -5,4 +5,4 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/var/app
+      - ./client:/var/app

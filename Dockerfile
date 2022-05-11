@@ -7,6 +7,6 @@ RUN pip3 install -U -r /tmp/requirements.txt
 COPY librdkafka.config /root/.confluent/librdkafka.config
 
 RUN mkdir /var/app
-COPY *.py ./var/app/
+COPY ./client/*.py ./var/app/
 
-CMD /var/app/client.py -f /root/.confluent/librdkafka.config -t iot
+CMD /var/app/client.py -f /root/.confluent/librdkafka.config -t aws-mqtt
