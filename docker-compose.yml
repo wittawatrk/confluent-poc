@@ -7,5 +7,6 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./aws-mqtt:/var/app
+      - ./aws-mqtt:/var/app/aws-mqtt
+      - ./thing:/var/app/thing
     command: ['python3']
