@@ -13,7 +13,7 @@ def acked(err, msg):
         pass
 
 def is_data_batch(topic_parts):
-    return topic_parts[0] == "app" and topic_parts[2] in ['telemetry', 'gateway'] and topic_parts[-1] == "telemetry"
+    return topic_parts[0] == "app" and topic_parts[-1] == "telemetry"
 
 def get_payloads(record_value):
     payloads = json.loads(record_value.decode('utf-8'))
