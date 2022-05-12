@@ -23,6 +23,7 @@
 # =============================================================================
 
 from confluent_kafka import Consumer, Producer, KafkaError
+import time
 import json
 import ccloud_lib
 
@@ -97,9 +98,11 @@ if __name__ == '__main__':
                 record_key = msg.key()
                 record_value = msg.value()
                 topic_parts = record_key.decode('utf-8').split('/')
+                kafka_ts = msg.timestamp()
+                timestamp = kafka_ts[1] if kafka_ts[0] != 1 else None
                 try:
                     if is_uc(topic_parts):
-                        process_uc(producer, topic_parts = topic_parts, value = record_value)
+                        process_uc(producer, topic_parts = topic_parts, value = record_value, timestamp = timestamp)
                         continue
                     if is_data_batch(topic_parts):
                         process_data_batch(producer, topic_parts = topic_parts, value = record_value)

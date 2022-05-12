@@ -284,7 +284,7 @@ def is_event(topic_type, config):
         return False
     return config.get('type') in ['UC3452', 'UC3352_v2']
 
-def process_uc(producer, topic_parts, value):
+def process_uc(producer, topic_parts, value, timestamp):
     uc_serial = topic_parts[1]
     topic_type = topic_parts[4]
     config = UC_SERIAL_MAPPER.get(uc_serial)
@@ -299,7 +299,7 @@ def process_uc(producer, topic_parts, value):
     data = {
         'account_id': account_id,
         'serial_id': serial_id,
-        'dt': datetime.now().strftime("%Y%m%d%H%M%S"),
+        'dt': datetime.fromtimestamp(timestamp / 1000).strftime("%Y%m%d%H%M%S"),
         'payload': {
             topic_type: value.hex(),
         }
