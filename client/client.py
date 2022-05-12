@@ -29,6 +29,10 @@ import ccloud_lib
 from uc import is_uc, process_uc
 from data_batch import is_data_batch, process_data_batch
 
+TIMESTAMP_NOT_AVAILABLE = 0
+TIMESTAMP_CREATE_TIME = 1
+TIMESTAMP_LOG_APPEND_TIME = 2
+
 def getConsumer(conf):
     # Create Consumer instance
     # 'auto.offset.reset=earliest' to start reading from the beginning of the
@@ -97,8 +101,9 @@ if __name__ == '__main__':
                 record_key = msg.key()
                 record_value = msg.value()
                 topic_parts = record_key.decode('utf-8').split('/')
-                kafka_ts = msg.timestamp()
-                timestamp = kafka_ts[1] if kafka_ts[0] != 1 else None
+                timestamp_type, timestamp = msg.timestamp()
+                if timestamp_type == TIMESTAMP_NOT_AVAILABLE:
+                    continue
                 try:
                     if is_uc(topic_parts):
                         process_uc(producer, topic_parts = topic_parts, value = record_value, timestamp = timestamp)

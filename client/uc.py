@@ -288,7 +288,7 @@ def process_uc(producer, topic_parts, value, timestamp):
     uc_serial = topic_parts[1]
     topic_type = topic_parts[4]
     config = UC_SERIAL_MAPPER.get(uc_serial)
-    date_time = datetime.now() if timestamp is None else datetime.fromtimestamp(timestamp / 1000)
+    date_time = datetime.fromtimestamp(timestamp / 1000)
     if config is None:
         return True
 
