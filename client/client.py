@@ -23,7 +23,6 @@
 # =============================================================================
 
 from confluent_kafka import Consumer, Producer, KafkaError
-import time
 import json
 import ccloud_lib
 
