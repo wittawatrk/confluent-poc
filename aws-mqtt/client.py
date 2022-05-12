@@ -77,7 +77,7 @@ if __name__ == '__main__':
     # Process messages
     total_count = 0
     try:
-        while total_count < 1000:
+        while True:
             msg = consumer.poll(1.0)
             if msg is None:
                 # No message available within timeout.
@@ -90,7 +90,6 @@ if __name__ == '__main__':
                 print('error: {}'.format(msg.error()))
             else:
                 # Check for Kafka message
-                total_count +=1
                 record_key = msg.key()
                 record_value = msg.value()
                 topic_parts = record_key.decode('utf-8').split('/')
