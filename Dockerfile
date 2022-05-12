@@ -6,7 +6,10 @@ RUN pip3 install -U -r /tmp/requirements.txt
 
 COPY librdkafka.config /root/.confluent/librdkafka.config
 
-RUN mkdir /var/app
-COPY ./client/*.py ./var/app/
+RUN mkdir -p /var/app/aws-mqtt
+RUN mkdir -p /var/app/thing
 
-CMD /var/app/client.py -f /root/.confluent/librdkafka.config -t aws-mqtt
+COPY ./aws-mqtt/*.py ./var/app/aws-mqtt/
+COPY ./thing/*.py ./var/app/thing/
+
+CMD /var/app/aws-mqtt/client.py -f /root/.confluent/librdkafka.config -t aws-mqtt

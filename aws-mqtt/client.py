@@ -34,7 +34,7 @@ def getConsumer(conf):
     # 'auto.offset.reset=earliest' to start reading from the beginning of the
     #   topic if no committed offsets exist
     consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    consumer_conf['group.id'] = 'python_example_group_1'
+    consumer_conf['group.id'] = 'python_example_group_2'
     consumer_conf['auto.offset.reset'] = 'earliest'
     
     return Consumer(consumer_conf)
@@ -69,10 +69,6 @@ if __name__ == '__main__':
 
     producer = getProducer(conf)
     
-    producer_topic = topic + '_out'
-    # Create producer topic if needed
-    ccloud_lib.create_topic(conf, producer_topic)
-    
     consumer = getConsumer(conf)
 
     # Subscribe to topic
@@ -104,6 +100,9 @@ if __name__ == '__main__':
                     if is_data_batch(topic_parts):
                         process_data_batch(producer, topic_parts = topic_parts, value = record_value)
                         continue
+                    
+                    producer.produce('topic', key=record_key, value=record_key, on_delivery=acked)
+                    producer.poll(0)
                 except BufferError as bfer:
                     # BufferError: Local: Queue full
                     print(bfer)
