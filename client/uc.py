@@ -1,61 +1,7 @@
-#!/usr/bin/env python
-#
-# Copyright 2020 Confluent Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-# =============================================================================
-#
-# Consume messages from Confluent Cloud
-# Using Confluent Python Client for Apache Kafka
-#
-# =============================================================================
-
-import base64
-from datetime import datetime
-from confluent_kafka import Consumer, Producer, KafkaError
 import json
-import ccloud_lib
+from datetime import datetime
 
-def getConsumer(conf):
-    # Create Consumer instance
-    # 'auto.offset.reset=earliest' to start reading from the beginning of the
-    #   topic if no committed offsets exist
-    consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    consumer_conf['group.id'] = 'python_convert_topic'
-    consumer_conf['auto.offset.reset'] = 'latest'
-    
-    return Consumer(consumer_conf)
-    
-def getProducer(conf):
-    # Create Producer instance
-    producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    return Producer(producer_conf)
-
-delivered_records = 0
-
-def acked(err, msg):
-    # global delivered_records
-    """Delivery report handler called on
-    successful or failed delivery of message
-    """
-    if err is not None:
-        print("Failed to deliver message: {}".format(err))
-    else:
-        pass
-
-serial_mapper = {
+UC_SERIAL_MAPPER = {
     '1234567890AB': {
         'account_id': 1, 'serial_id': 10022, 'env': ['stag']
     },
@@ -316,69 +262,55 @@ serial_mapper = {
     }
 }
 
-def process():
-    return None
-   
-if __name__ == '__main__':
-
-    # Read arguments and configurations and initialize
-    args = ccloud_lib.parse_args()
-    config_file = args.config_file
-    topic = args.topic
-    conf = ccloud_lib.read_ccloud_config(config_file)
-
-    producer = getProducer(conf)
-    
-    telemetry_topic = 'telemetry'
-    ccloud_lib.create_topic(conf, telemetry_topic)
-    raw_event_topic = 'raw_event'
-    ccloud_lib.create_topic(conf, raw_event_topic)
-    
-    consumer = getConsumer(conf)
-    consumer.subscribe([topic])
-
-    try:
-        while True:
-            msg = consumer.poll(1.0)
-            if msg is None:
-                print("Waiting for message or event/error in poll()")
-                continue
-            elif msg.error():
-                print('error: {}'.format(msg.error()))
-            else:
-                record_key = msg.key()
-                record_value = msg.value()
-
-                key_str = record_key.decode('utf-8')
-                keys = key_str.split('/')
-
-                if  len(keys) == 5 and keys[0] == 'uc' and keys[-1] in ['msg', 'alarm', 'status']:
-                    serial_number = keys[1]
-                    topic_type = keys[4]
-                    if (serial_number not in serial_mapper):
-                        continue
-                    selector = serial_mapper[serial_number]
-                    if ('prod' not in selector['env']): # env
-                        continue
-
-                    payload = json.dumps({
-                        'data' : record_value.hex(), # disabled encode base64
-                        'account_id': selector['account_id'],
-                        'serial_id': selector['serial_id'],
-                        'dt': datetime.now().strftime("%Y%m%d%H%M%S")
-                    })
-
-                    if (topic_type in ['alarm', 'msg']) and ('type' in  selector) and (selector['type'] in ['UC3452', 'UC3352_v2']):
-                        produce_topic = raw_event_topic
-                    else:
-                        produce_topic = telemetry_topic
-                    
-                    producer.produce(produce_topic, key=record_key, value=payload, on_delivery=acked)
-                    producer.poll(0)
-                continue
-                
-    except KeyboardInterrupt:
+def acked(err, msg):
+    # global delivered_records
+    """Delivery report handler called on
+    successful or failed delivery of message
+    """
+    if err is not None:
+        print("Failed to deliver message: {}".format(err))
+    else:
         pass
-    finally:
-        producer.flush()
-        consumer.close()
+
+def is_uc(topic_parts):
+    if len(topic_parts) != 5:
+        return False
+    if topic_parts[0] != 'uc':
+        return False
+    return topic_parts[-1] in ['msg', 'alarm', 'status']
+
+def is_event(topic_type, config):
+    if topic_type not in ['alarm', 'msg']:
+        return False
+    return config.get('type') in ['UC3452', 'UC3352_v2']
+
+def process_uc(producer, topic_parts, value):
+    uc_serial = topic_parts[1]
+    topic_type = topic_parts[4]
+    config = UC_SERIAL_MAPPER.get(uc_serial)
+    if config is None:
+        return True
+
+    if 'prod' not in config['env']: # env
+        return True
+
+    account_id = config['account_id']
+    serial_id = config['serial_id']
+    data = {
+        'account_id': account_id,
+        'serial_id': serial_id,
+        'dt': datetime.now().strftime("%Y%m%d%H%M%S"),
+        'payload': {
+            topic_type: value.hex(),
+        }
+    }
+    
+    if is_event(topic_type, config):
+        data['type'] = 'uc33-event'
+    else:
+        data['type'] = 'uc33-telemetry'
+        ## event uc33
+    
+    record_key = "{}-{}".format(account_id, serial_id)
+    producer.produce('things', key=record_key, value=json.dumps(data), on_delivery=acked)
+    producer.poll(0)
