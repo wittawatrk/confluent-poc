@@ -159,10 +159,9 @@ def process_data_batch(producer, topic_parts, value, timestamp):
 
         data['type'] = 'telemetry'
         if is_uc11(serial_id):
+            data['type'] = 'uc11-telemetry'
             if is_event(payload):
                 data['type'] = 'uc11-event'
-            else:
-                data['type'] = 'uc11-telemetry'
 
         record_key = "{}-{}".format(account_id, serial_id)
         producer.produce('things', key=record_key, value=json.dumps(data), on_delivery=acked)
