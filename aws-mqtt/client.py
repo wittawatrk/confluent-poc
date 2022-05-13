@@ -108,7 +108,12 @@ if __name__ == '__main__':
                         process_data_batch(producer, topic_parts = topic_parts, value = record_value, timestamp = timestamp)
                         continue
                     
-                    producer.produce('topic', key=record_key, value=record_key, on_delivery=acked)
+                    unprocessed_topic_value = json.dumps({
+                        'topic': record_key.decode('utf-8')
+                    })
+
+                    producer.produce('unprocessed_topic', key=record_key, value=unprocessed_topic_value, on_delivery=acked)
+                  
                     producer.poll(0)
                 except BufferError as bfer:
                     # BufferError: Local: Queue full
