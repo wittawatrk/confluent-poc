@@ -1,6 +1,70 @@
 import json
 import pytz
+import base64
 from datetime import datetime
+
+UC11_SERIAL = [
+    133000,
+    133001,
+    133001,
+    155000,
+    155000,
+    157000,
+    157000,
+    160002,
+    160002,
+    160002,
+    160002,
+    160002,
+    160002,
+    160002,
+    160003,
+    160003,
+    160003,
+    160003,
+    160010,
+    160010,
+    160010,
+    160011,
+    160011,
+    160011,
+    160011,
+    160012,
+    160012,
+    160013,
+    160013,
+    167000,
+    167000,
+    168006,
+    168006,
+    168006,
+    168006,
+    168006,
+    168006,
+    168006,
+    171000,
+    171000,
+    171000,
+    171001,
+    171001,
+    171001,
+    171002,
+    30010,
+    30012,
+    30014,
+    30019,
+    30024,
+    30026,
+    30040,
+    30043,
+    30047,
+    30050,
+    320005,
+    320006,
+    320007,
+    320008,
+    320009
+]
 
 def acked(err, msg):
     # global delivered_records
@@ -34,6 +98,17 @@ def add_serial(payload):
     #payload['serial_id'] = lambda x: payload[x] if x in ['emid', 'esid', 'external_sensor_id', 'deviceName'] else payload['serial_id']
 
     return payload
+
+def is_uc11(serial_id):
+    if int(serial_id) in UC11_SERIAL:
+        return True
+
+    return False
+
+def is_event(payload):
+    decoded_bytes = base64.b64decode(payload['data'])
+
+    return decoded_bytes[:2].hex().startswith('ff12')
 
 timezone = pytz.timezone("Asia/Bangkok")
 def get_dt(payload, timestamp):
@@ -71,6 +146,9 @@ def process_data_batch(producer, topic_parts, value, timestamp):
         ## TODO: check payload time sequence
         serial_id = payload.get('serial_id')
 
+        if serial_id is None:
+            continue
+
         dt = get_dt(payload, timestamp)
         data = {
             'account_id': account_id,
@@ -78,7 +156,12 @@ def process_data_batch(producer, topic_parts, value, timestamp):
             'dt': dt,
             'payload': payload
         }
-        data['type'] = 'telemetry' ## uc11-telemetry, uc11-event
+
+        data['type'] = 'telemetry'
+        if is_uc11(serial_id):
+            data['type'] = 'uc11-telemetry'
+            if is_event(payload):
+                data['type'] = 'uc11-event'
 
         record_key = "{}-{}".format(account_id, serial_id)
         producer.produce('things', key=record_key, value=json.dumps(data), on_delivery=acked)
