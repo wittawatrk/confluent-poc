@@ -101,7 +101,6 @@ def add_serial(payload):
 
 def is_uc11(serial_id):
     if int(serial_id) in UC11_SERIAL:
-        print('UC11 - ' + serial_id)
         return True
 
     return False
