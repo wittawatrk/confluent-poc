@@ -1,5 +1,4 @@
 FROM 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/amd64/python:3.7-slim
-# FROM amd64/python:3.7-slim
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install -U -r /tmp/requirements.txt

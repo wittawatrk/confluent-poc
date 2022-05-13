@@ -105,7 +105,7 @@ if __name__ == '__main__':
                         process_uc(producer, topic_parts = topic_parts, value = record_value, timestamp = timestamp)
                         continue
                     if is_data_batch(topic_parts):
-                        process_data_batch(producer, topic_parts = topic_parts, value = record_value)
+                        process_data_batch(producer, topic_parts = topic_parts, value = record_value, timestamp = timestamp)
                         continue
                     
                     producer.produce('topic', key=record_key, value=record_key, on_delivery=acked)

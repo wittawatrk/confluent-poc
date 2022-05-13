@@ -36,16 +36,20 @@ def add_serial(payload):
     return payload
 
 timezone = pytz.timezone("Asia/Bangkok")
-def get_dt(payload):
+def get_dt(payload, timestamp):
     ## ex: "time": "2021-04-29T07:05:47.226422Z"
-    # if 'time' in payload:
-        # return timezone.localize(payload['time']).strftime("%Y%m%d%H%M%S")
+    if 'time' in payload:
+        dt = datetime.strptime(payload['time'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        return timezone.localize(dt).strftime("%Y%m%d%H%M%S")
 
+    ## "mdt": "202104282100" still check length 12
     if 'mdt' in payload:
-        return payload['mdt']
+        payload['dt'] = payload['mdt']
 
+    ## "sdt": "20220511154100" length 14
+    ## "sdt": "202205111541" still check length 12, 
     if 'sdt' in payload:
-        return payload['sdt']
+        payload['dt'] = payload['sdt']
 
     # ex: "dt": "202104282100"
     if 'dt' in payload and len(payload['dt']) == 12:
@@ -53,20 +57,21 @@ def get_dt(payload):
 
     ## ex: "use_current_time": true || don't have dt
     if 'use_current_time' in payload:
-        return timezone.localize(datetime.now()).strftime("%Y%m%d%H%M%S")
+        return datetime.fromtimestamp(timestamp / 1000).strftime("%Y%m%d%H%M%S")
 
     if 'dt' in payload:
         return payload['dt']
-    return timezone.localize(datetime.now()).strftime("%Y%m%d%H%M%S")
 
-def process_data_batch(producer, topic_parts, value):
+    return datetime.fromtimestamp(timestamp / 1000).strftime("%Y%m%d%H%M%S")
+
+def process_data_batch(producer, topic_parts, value, timestamp):
     account_id = topic_parts[1]
     payloads = get_payloads(value)
     for payload in payloads: 
         ## TODO: check payload time sequence
         serial_id = payload.get('serial_id')
 
-        dt = get_dt(payload)
+        dt = get_dt(payload, timestamp)
         data = {
             'account_id': account_id,
             'serial_id': serial_id,
