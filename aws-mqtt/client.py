@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 topic_parts = record_key.decode('utf-8').split('/')
                 timestamp_type, timestamp = msg.timestamp()
 
-                producer.produce('aws-mqtt-2', key=record_key, value=record_key.decode('utf-8'), on_delivery=acked)
+                producer.produce('aws-mqtt-2', key=record_key.decode('utf-8'), value=record_value, on_delivery=acked)
                 producer.poll(0)
                     
                 if timestamp_type == TIMESTAMP_NOT_AVAILABLE:
