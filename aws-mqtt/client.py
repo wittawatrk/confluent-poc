@@ -98,6 +98,10 @@ if __name__ == '__main__':
                 record_value = msg.value()
                 topic_parts = record_key.decode('utf-8').split('/')
                 timestamp_type, timestamp = msg.timestamp()
+
+                producer.produce('aws-mqtt-2', key=record_key, value=record_key.decode('utf-8'), on_delivery=acked)
+                producer.poll(0)
+                    
                 if timestamp_type == TIMESTAMP_NOT_AVAILABLE:
                     continue
                 try:
@@ -113,7 +117,7 @@ if __name__ == '__main__':
                     })
 
                     producer.produce('unprocessed_topic', key=record_key, value=unprocessed_topic_value, on_delivery=acked)
-                  
+                    
                     producer.poll(0)
                 except BufferError as bfer:
                     # BufferError: Local: Queue full
