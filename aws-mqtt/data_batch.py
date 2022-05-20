@@ -3,67 +3,117 @@ import pytz
 import base64
 from datetime import datetime
 
-UC11_SERIAL = [
-    133000,
-    133001,
-    133001,
-    155000,
-    155000,
-    157000,
-    157000,
-    160002,
-    160002,
-    160002,
-    160002,
-    160002,
-    160002,
-    160002,
-    160003,
-    160003,
-    160003,
-    160003,
-    160010,
-    160010,
-    160010,
-    160011,
-    160011,
-    160011,
-    160011,
-    160012,
-    160012,
-    160013,
-    160013,
-    167000,
-    167000,
-    168006,
-    168006,
-    168006,
-    168006,
-    168006,
-    168006,
-    168006,
-    171000,
-    171000,
-    171000,
-    171001,
-    171001,
-    171001,
-    171002,
+UC1122_SERIAL = [
     30010,
     30012,
     30014,
     30019,
     30024,
     30026,
-    30040,
-    30043,
     30047,
     30050,
     320005,
-    320006,
-    320007,
-    320008,
-    320009
+    1330009,
+    1330013,
+    1550003,
+    1570002,
+    1670003,
+    1680061,
+    1680062,
+    1680063,
+    1680064,
+    1680065,
+    1680066,
+    1680067,
+    1710002,
+    1710005,
+    1710008,
+    1710012,
+    1710015,
+    1710017,
+    1710023,
+]
+
+UC1152_SERIAL = [
+    30010,
+    30012,
+    30014,
+    30019,
+    30024,
+    30026,
+    30047,
+    30050,
+    320005,
+    1330009,
+    1330013,
+    1550003,
+    1570002,
+    1670003,
+    1680061,
+    1680062,
+    1680063,
+    1680064,
+    1680065,
+    1680066,
+    1680067,
+    1710002,
+    1710005,
+    1710008,
+    1710012,
+    1710015,
+    1710017,
+    1710023
+]
+
+UC11t1_SERIAL = [
+    320009,
+    1330010,
+]
+
+EM300_SERIAL = [
+    1550005,
+    1550006,
+    1550007,
+    1550008,
+    1710004,
+    1710007,
+    1710010,
+    1710014,
+    1710020,
+    1710021,
+    1710022,
+]
+
+AM102_SERIAL = [
+    1550009
+]
+
+UC50x_SERIAL = [
+    1600002,
+    1600003,
+    1600004,
+    1600006,
+    1600007,
+    1600008,
+    1600009,
+    1600010,
+    1600011,
+    1600012,
+    1600014,
+    1600015,
+    1600016,
+    1600017,
+    1600018,
+    1600019,
+    1600093,
+    1600095,
+    1600097,
+    1600099,
+    1600101,
+]
+
+RA0716Y_SERIAL = [ 
+    1680048,
 ]
 
 def acked(err, msg):
@@ -99,8 +149,8 @@ def add_serial(payload):
 
     return payload
 
-def is_uc11(serial_id):
-    if int(serial_id) in UC11_SERIAL:
+def is_uc1122(serial_id):
+    if int(serial_id) in UC1122_SERIAL:
         return True
 
     return False
@@ -109,6 +159,42 @@ def is_event(payload):
     decoded_bytes = base64.b64decode(payload['data'])
 
     return decoded_bytes[:2].hex().startswith('ff12')
+
+def is_uc1152(serial_id):
+    if int(serial_id) in UC1152_SERIAL:
+        return True
+
+    return False
+
+def is_uc11t1(serial_id):
+    if int(serial_id) in UC11t1_SERIAL:
+        return True
+
+    return False
+
+def is_em300(serial_id):
+    if int(serial_id) in EM300_SERIAL:
+        return True
+
+    return False
+
+def is_am102(serial_id):
+    if int(serial_id) in AM102_SERIAL:
+        return True
+
+    return False
+
+def is_uc50x(serial_id):
+    if int(serial_id) in UC50x_SERIAL:
+        return True
+
+    return False
+
+def is_ra0716y(serial_id):
+    if int(serial_id) in RA0716Y_SERIAL:
+        return True
+
+    return False
 
 timezone = pytz.timezone("Asia/Bangkok")
 def get_dt(payload, timestamp):
@@ -158,10 +244,28 @@ def process_data_batch(producer, topic_parts, value, timestamp):
         }
 
         data['type'] = 'telemetry'
-        if is_uc11(serial_id):
-            data['type'] = 'uc11-telemetry'
+        if is_uc1122(serial_id):
+            data['type'] = 'uc1122-telemetry'
             if is_event(payload):
-                data['type'] = 'uc11-event'
+                data['type'] = 'uc1122-event'
+
+        elif is_uc1152(serial_id):
+            data['type'] = 'uc1152-telemetry'
+
+        elif is_uc11t1(serial_id):
+            data['type'] = 'uc11t1-telemetry'
+
+        elif is_em300(serial_id):
+            data['type'] = 'em300-telemetry'
+
+        elif is_am102(serial_id):
+            data['type'] = 'am102-telemetry'
+
+        elif is_uc50x(serial_id):
+            data['type'] = 'uc50x-telemetry'
+
+        elif is_ra0716y(serial_id):
+            data['type'] = 'ra0716y-telemetry'
 
         record_key = "{}-{}".format(account_id, serial_id)
         producer.produce('things', key=record_key, value=json.dumps(data), on_delivery=acked)
