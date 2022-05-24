@@ -4,19 +4,7 @@ import base64
 from datetime import datetime
 
 UC1122_SERIAL = [
-    30010,
-    30012,
-    30014,
-    30019,
-    30024,
-    30026,
-    30047,
-    30050,
-    320005,
-    1330009,
-    1330013,
     1550003,
-    1570002,
     1670003,
     1680061,
     1680062,
@@ -35,19 +23,7 @@ UC1122_SERIAL = [
 ]
 
 UC1152_SERIAL = [
-    30010,
-    30012,
-    30014,
-    30019,
-    30024,
-    30026,
-    30047,
-    30050,
-    320005,
-    1330009,
-    1330013,
     1550003,
-    1570002,
     1670003,
     1680061,
     1680062,
@@ -63,11 +39,6 @@ UC1152_SERIAL = [
     1710015,
     1710017,
     1710023
-]
-
-UC11t1_SERIAL = [
-    320009,
-    1330010,
 ]
 
 EM300_SERIAL = [
@@ -251,9 +222,6 @@ def process_data_batch(producer, topic_parts, value, timestamp):
 
         elif is_uc1152(serial_id):
             data['type'] = 'uc1152-telemetry'
-
-        elif is_uc11t1(serial_id):
-            data['type'] = 'uc11t1-telemetry'
 
         elif is_em300(serial_id):
             data['type'] = 'em300-telemetry'
