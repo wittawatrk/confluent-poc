@@ -14,6 +14,8 @@ spec:
       labels:
         app: confluent
     spec:
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: {{ NODEGROUP_NAME }}
       containers:
       - name: python
         image: 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/enres-confluent-poc:{{ IMAGE_TAG }}
