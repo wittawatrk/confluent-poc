@@ -53,7 +53,7 @@ UC_SERIAL_MAPPER = {
     '6123A4953933': {
         'account_id': 164, 'serial_id': 1640007, 'env': ['prod'], 'type': 'UC3352-enres-custom'
     },
-    '6113A3993564': {
+    '6113B2137132': {
         'account_id': 164, 'serial_id': 1640014, 'env': ['prod'], 'type': 'UC3322'
     },
     '6123A4978097': {
@@ -253,6 +253,9 @@ UC_SERIAL_MAPPER = {
     },
     '6123B0555478': {
         'account_id': 186, 'serial_id': 1860001, 'env': ['prod'], 'type': 'UC3452-enres-custom'
+    },
+    '6123B0554435': {
+        'account_id': 187, 'serial_id': 1870001, 'env': ['prod'], 'type': 'UC3452-enres-custom'
     }
 }
 
