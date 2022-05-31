@@ -1,7 +1,16 @@
-FROM 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/amd64/python:3.7-slim
+FROM 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/enres/python:3.9-slim
+
+#Install build tools
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    make \
+    python3-dev \
+    librdkafka-dev;
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install -U -r /tmp/requirements.txt
+RUN pip3 install -U -r /tmp/requirements.txt --no-binary=confluent-kafka
 
 COPY librdkafka.config /root/.confluent/librdkafka.config
 
