@@ -1,4 +1,16 @@
-FROM 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/amd64/python:3.7-slim
+FROM arm64v8/python:3.9-slim
+
+#Install build tools
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    make \
+    python3-dev \
+    librdkafka-dev;
+
+#Build confluent-kafka with --no-binary option to disable python wheel
+RUN pip3 install "confluent-kafka[avro,json,protobuf]>=1.4.2" --no-binary confluent-kafka
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install -U -r /tmp/requirements.txt
