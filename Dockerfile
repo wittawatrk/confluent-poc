@@ -9,11 +9,8 @@ RUN set -eux; \
     python3-dev \
     librdkafka-dev;
 
-#Build confluent-kafka with --no-binary option to disable python wheel
-RUN pip3 install "confluent-kafka[avro,json,protobuf]>=1.4.2" --no-binary confluent-kafka
-
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install -U -r /tmp/requirements.txt
+RUN pip3 install -U -r /tmp/requirements.txt --no-binary=confluent-kafka
 
 COPY librdkafka.config /root/.confluent/librdkafka.config
 
