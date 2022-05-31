@@ -1,4 +1,4 @@
-FROM arm64v8/python:3.9-slim
+FROM 659821968821.dkr.ecr.ap-southeast-1.amazonaws.com/enres/python:3.9-slim
 
 #Install build tools
 RUN set -eux; \
