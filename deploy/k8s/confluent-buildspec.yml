@@ -36,5 +36,4 @@ phases:
       - echo Apply confluent-depl;
       - sed -i -e "s/{{ IMAGE_TAG }}/$IMAGE_TAG/g" deploy/k8s/12-confluent-depl.yaml;
       - sed -i -e "s/{{ NAMESPACE }}/$NAMESPACE/g" deploy/k8s/12-confluent-depl.yaml;
-      - sed -i -e "s/{{ NODEGROUP_NAME }}/$NODEGROUP_NAME/g" deploy/k8s/12-confluent-depl.yaml;
       - kubectl apply -f deploy/k8s/12-confluent-depl.yaml;
